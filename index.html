@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Чек-лист процедур | Санаторий (один день, чек-боксы)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7fc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 12px;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 28px 24px;
+            border-radius: 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 15px 30px -10px rgba(30, 60, 114, 0.4);
+        }
+
+        .gradient-header h1 {
+            font-size: clamp(1.8rem, 6vw, 2.6rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: inline-block;
+            padding: 8px 28px;
+            border-radius: 60px;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .filters-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 22px -10px rgba(0,30,60,0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 30px;
+            align-items: flex-end;
+            border: 1px solid rgba(203, 213, 225, 0.5);
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 200px;
+        }
+
+        .filter-item label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #2d3c5e;
+        }
+
+        .filter-item input {
+            padding: 12px 18px;
+            border: 1.5px solid #dce5f0;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            background-color: white;
+            transition: 0.2s;
+            cursor: pointer;
+            outline: none;
+            color: #1a2b4a;
+            font-weight: 500;
+        }
+
+        .filter-item input:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.15);
+        }
+
+        .patient-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 18px;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .patient-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f4fa;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1e2f4a;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .patient-tag input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2a5298;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .patient-tag:has(input:checked) {
+            background: white;
+            border-color: #b7c9e2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .day-schedule {
+            background: white;
+            border-radius: 36px;
+            padding: 28px 26px;
+            box-shadow: 0 22px 40px -16px rgba(0,30,60,0.2);
+            margin-bottom: 25px;
+        }
+
+        .day-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 18px;
+            border-bottom: 2px dashed #dde3ed;
+        }
+
+        .day-title {
+            font-size: 1.8rem;
+            font-weight: 650;
+            background: linear-gradient(145deg, #1e2f4a, #2a3f66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .attendance-badge {
+            background: #e2f0e8;
+            padding: 10px 24px;
+            border-radius: 60px;
+            color: #0b4d2e;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-left: 5px solid #2e8b6c;
+        }
+
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .patient-card {
+            border-radius: 28px;
+            padding: 20px 16px;
+            background-color: #ffffff;
+            box-shadow: 0 8px 18px -6px rgba(0,30,50,0.08);
+            transition: transform 0.15s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 28px -12px rgba(30,60,120,0.2);
+        }
+
+        .patient-code {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .procedure-list {
+            list-style: none;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .procedure-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            font-size: 0.95rem;
+            gap: 8px;
+        }
+
+        .proc-name {
+            font-weight: 500;
+            color: #1e293b;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .proc-time {
+            font-size: 0.8rem;
+            color: #45607e;
+            background: #eef3fc;
+            padding: 4px 10px;
+            border-radius: 40px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Стилизованный чекбокс */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d0ddeb;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background-color: #2e8b6c;
+            border-color: #2e8b6c;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:hover {
+            border-color: #7f9bc2;
+        }
+
+        .patient-progress {
+            margin-top: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.7);
+            padding: 8px 12px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            border: 1px solid #e5ecf5;
+        }
+
+        .progress-value {
+            background: #2a3f66;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 40px;
+        }
+
+        @media (max-width: 1100px) {
+            .patients-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .patients-grid {
+                grid-template-columns: 1fr;
+            }
+            .filters-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .patient-toggles {
+                margin-left: 0;
+                justify-content: flex-start;
+            }
+        }
+
+        .text-small {
+            color: #62748c;
+            font-size: 0.8rem;
+            margin-top: 20px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="gradient-header">
+        <h1>✓ Чек-лист процедур</h1>
+    </header>
+
+    <div class="filters-panel">
+        <div class="filter-item">
+            <label>📅 ДАТА (МСК)</label>
+            <input type="date" id="dateFilter" value="">
+        </div>
+
+        <div class="patient-toggles" id="patientFilters">
+            <label class="patient-tag" style="background: #ffe6d5; border-color: #f9b994;">
+                <input type="checkbox" value="V" checked> Пациент V
+            </label>
+            <label class="patient-tag" style="background: #d9e9ff; border-color: #a7c6ed;">
+                <input type="checkbox" value="Zl" checked> Пациент Zl
+            </label>
+            <label class="patient-tag" style="background: #daf1e4; border-color: #9fcdb5;">
+                <input type="checkbox" value="I" checked> Пациент I
+            </label>
+            <label class="patient-tag" style="background: #feebcc; border-color: #f7cf9a;">
+                <input type="checkbox" value="D" checked> Пациент D
+            </label>
+        </div>
+    </div>
+
+    <div class="day-schedule" id="scheduleDisplay">
+        <div class="day-header">
+            <span class="day-title" id="selectedDateTitle"></span>
+            <span class="attendance-badge" id="overallAttendance">Общий %: 0%</span>
+        </div>
+
+        <div class="patients-grid" id="patientsContainer"></div>
+        <div class="text-small">* Отметьте чек-боксы, если процедура посещена</div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ----- ДАННЫЕ ИЗ ЛИСТ2 (обновлены с учетом новых процедур) -----
+    const proceduresDataRaw = [
+        // Время, пациент, название, даты
+        { time: "8-30", patient: "V", name: "Аквааэробика", dates: "каждый день" },
+        { time: "8-30", patient: "Zl", name: "Кровь", dates: "25.02" },
+        { time: "9-00", patient: "V", name: "Завтрак", dates: "каждый день" },
+        { time: "9-00", patient: "Zl", name: "Завтрак", dates: "каждый день" },
+        { time: "9-15", patient: "V", name: "Ингаляции (8:30-11:30)", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "9-15", patient: "Zl", name: "Ингаляции (8:30-11:30)", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "9-15", patient: "I", name: "Ингаляции (8:30-11:30)", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "9-15", patient: "D", name: "Ингаляции (8:30-11:30)", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "9-20", patient: "Zl", name: "Массаж к214", dates: "24.02, 25.02, 26.02, 27.02, 28.02, 03.03" },
+        { time: "9-40", patient: "V", name: "Грязь к0", dates: "25.02, 27.02, 02.03, 04.03, 05.03" },
+        { time: "9-40", patient: "Zl", name: "Грязь к0", dates: "25.02, 27.02, 02.03, 04.03, 05.03" },
+        { time: "10-00", patient: "Zl", name: "Физио к208 (8:30-11:30)", dates: "24.02, 25.02, 26.02, 27.02, 28.02, 02.03, 03.03" },
+        { time: "10-40", patient: "V", name: "Пресс к208", dates: "24.02, 25.02, 26.02, 27.02, 02.03" },
+        { time: "11-00", patient: "V", name: "ЛФК", dates: "" }, // без дат – игнорируем при фильтрации
+        { time: "11-00", patient: "D", name: "Грязь к0", dates: "24.02, 26.02, 27.02, 02.03, 04.03" },
+        { time: "11-40", patient: "V", name: "Детензор", dates: "каждый день" },
+        { time: "12-30", patient: "V", name: "Физио к201", dates: "24.02, 25.02, 26.02, 27.02, 02.03" },
+        { time: "12-30", patient: "Zl", name: "ЛОР", dates: "26.02" },
+        { time: "12-40", patient: "I", name: "Физио-Нос к208", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "13-10", patient: "I", name: "БОС к305", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "13-10", patient: "D", name: "Ванны", dates: "24.02, 26.02, 02.03, 03.03, 04.03, 06.03" },
+        { time: "13-20", patient: "Zl", name: "БОС к305", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "13-40", patient: "V", name: "Ванны", dates: "24.02, 26.02, 02.03, 03.03, 04.03, 06.03" },
+        { time: "13-40", patient: "I", name: "Ванны", dates: "24.02, 26.02, 27.02, 02.03, 04.03, 06.03" },
+        { time: "13-50", patient: "D", name: "Массаж к213", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "14-00", patient: "V", name: "Гинеколог", dates: "2026-02-25 00:00:00" },
+        { time: "14-10", patient: "I", name: "Массаж к214", dates: "24.02, 25.02, 26.02, 27.02, 28.02, 03.03" },
+        { time: "14-15", patient: "D", name: "СМТ", dates: "24.02, 25.02, 26.02, 27.02, 02.03" },
+        { time: "14-30", patient: "V", name: "Массаж", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" },
+        { time: "14-30", patient: "I", name: "СМТ к201", dates: "24.02, 25.02, 26.02, 27.02, 02.03, 03.03" }
+    ];
+
+    // Оставляем только те, у которых есть непустые даты (и не "каждый день" тоже оставляем)
+    const proceduresData = proceduresDataRaw.filter(p => p.dates.trim() !== '');
+
+    const pastelColors = {
+        V: '#ffe6d5',
+        Zl: '#d9e9ff',
+        I: '#daf1e4',
+        D: '#feebcc'
+    };
+
+    // Хранилище отметок: marksByDate[дата][пациент][индекс] = true/false
+    let marksByDate = {};
+
+    // Функция проверки попадания процедуры на дату (YYYY-MM-DD)
+    function isProcedureOnDate(proc, dateStr) {
+        const datesField = proc.dates.trim();
+        if (datesField === 'каждый день') return true;
+
+        // Полная дата в формате YYYY-MM-DD (как у Гинеколога)
+        if (datesField.includes('-')) {
+            const match = datesField.match(/(\d{4}-\d{2}-\d{2})/);
+            if (match && match[1] === dateStr) return true;
+            return false;
+        }
+
+        // Формат DD.MM
+        const targetDDMM = dateStr.slice(8,10) + '.' + dateStr.slice(5,7);
+        // Разделители: запятая с пробелом или без
+        const dateList = datesField.split(',').map(s => s.trim().replace(/\s+/g, ''));
+        return dateList.includes(targetDDMM);
+    }
+
+    // Получить процедуры для конкретной даты, сгруппированные по пациенту
+    function getProceduresForDate(dateStr) {
+        const byPatient = { V: [], Zl: [], I: [], D: [] };
+        proceduresData.forEach(proc => {
+            if (isProcedureOnDate(proc, dateStr)) {
+                const patient = proc.patient;
+                if (byPatient[patient]) {
+                    byPatient[patient].push({ time: proc.time, name: proc.name });
+                }
+            }
+        });
+        // Сортировка по времени (преобразуем "ч-мм" в минуты)
+        Object.keys(byPatient).forEach(pat => {
+            byPatient[pat].sort((a, b) => {
+                const toMinutes = (t) => {
+                    const [h, m] = t.split('-').map(Number);
+                    return h * 60 + (m || 0);
+                };
+                return toMinutes(a.time) - toMinutes(b.time);
+            });
+        });
+        return byPatient;
+    }
+
+    // Инициализация отметок для даты, если их нет
+    function ensureMarksForDate(dateStr, procsByPatient) {
+        if (!marksByDate[dateStr]) {
+            marksByDate[dateStr] = { V: {}, Zl: {}, I: {}, D: {} };
+        }
+        ['V','Zl','I','D'].forEach(pat => {
+            const procs = procsByPatient[pat] || [];
+            const newMarks = {};
+            procs.forEach((_, idx) => {
+                // сохраняем существующее значение или false
+                newMarks[idx] = marksByDate[dateStr][pat][idx] || false;
+            });
+            marksByDate[dateStr][pat] = newMarks;
+        });
+    }
+
+    // Пересчёт процента для пациента в конкретный день
+    function calcPatientProgress(dateStr, patient, procs) {
+        if (!procs.length) return 0;
+        let doneCount = 0;
+        procs.forEach((_, idx) => {
+            if (marksByDate[dateStr] && marksByDate[dateStr][patient] && marksByDate[dateStr][patient][idx]) doneCount++;
+        });
+        return Math.round((doneCount / procs.length) * 100);
+    }
+
+    // Общий процент за день
+    function calcOverallPercent(dateStr, procsByPatient) {
+        let total = 0, done = 0;
+        for (let pat of ['V','Zl','I','D']) {
+            const list = procsByPatient[pat] || [];
+            list.forEach((_, idx) => {
+                total++;
+                if (marksByDate[dateStr] && marksByDate[dateStr][pat] && marksByDate[dateStr][pat][idx]) done++;
+            });
+        }
+        return total ? Math.round((done / total) * 100) : 0;
+    }
+
+    // Рендер одного дня
+    function render() {
+        const dateInput = document.getElementById('dateFilter');
+        let selectedDate = dateInput.value;
+
+        // Если дата не выбрана, используем сегодняшнюю по Москве
+        if (!selectedDate) {
+            const today = new Date();
+            const moscowTime = new Date(today.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+            const year = moscowTime.getFullYear();
+            const month = String(moscowTime.getMonth() + 1).padStart(2, '0');
+            const day = String(moscowTime.getDate()).padStart(2, '0');
+            selectedDate = `${year}-${month}-${day}`;
+            dateInput.value = selectedDate;
+        }
+
+        // Форматируем для заголовка
+        const [year, month, day] = selectedDate.split('-');
+        const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+        const formattedDate = `${parseInt(day)} ${monthNames[parseInt(month)-1]} ${year}`;
+        document.getElementById('selectedDateTitle').innerText = formattedDate;
+
+        const procsByPatient = getProceduresForDate(selectedDate);
+        ensureMarksForDate(selectedDate, procsByPatient);
+
+        const activePatients = [];
+        document.querySelectorAll('#patientFilters input[type="checkbox"]:checked').forEach(cb => activePatients.push(cb.value));
+
+        const container = document.getElementById('patientsContainer');
+        let html = '';
+
+        for (let patient of ['V','Zl','I','D']) {
+            if (!activePatients.includes(patient)) continue;
+            const procs = procsByPatient[patient] || [];
+            if (procs.length === 0) continue;
+
+            const progress = calcPatientProgress(selectedDate, patient, procs);
+            const bgColor = pastelColors[patient] || '#f0f0f0';
+
+            html += `<div class="patient-card" style="background-color: ${bgColor};">`;
+            html += `<div class="patient-code">Пациент ${patient}</div>`;
+            html += `<ul class="procedure-list">`;
+
+            procs.forEach((proc, idx) => {
+                const checked = marksByDate[selectedDate][patient][idx] ? 'checked' : '';
+                html += `<li class="procedure-item">`;
+                html += `<span class="proc-name">${proc.name}</span>`;
+                html += `<span class="proc-time">${proc.time}</span>`;
+                html += `<span class="checkbox-wrapper">`;
+                html += `<input type="checkbox" class="proc-checkbox" data-date="${selectedDate}" data-patient="${patient}" data-idx="${idx}" ${checked}>`;
+                html += `</span>`;
+                html += `</li>`;
+            });
+
+            html += `</ul>`;
+            html += `<div class="patient-progress">Посещаемость <span class="progress-value">${progress}%</span></div>`;
+            html += `</div>`;
+        }
+
+        if (html === '') {
+            container.innerHTML = '<p style="text-align:center; padding: 40px; background: #f4f7fb; border-radius: 40px;">Нет процедур на выбранную дату для отображения.</p>';
+        } else {
+            container.innerHTML = html;
+        }
+
+        document.getElementById('overallAttendance').innerText = `Общий %: ${calcOverallPercent(selectedDate, procsByPatient)}%`;
+    }
+
+    // Обработчик изменения чекбоксов процедур (делегирование)
+    document.getElementById('patientsContainer').addEventListener('change', (e) => {
+        if (!e.target.classList.contains('proc-checkbox')) return;
+
+        const dateStr = e.target.dataset.date;
+        const patient = e.target.dataset.patient;
+        const idx = e.target.dataset.idx;
+
+        if (!dateStr || !patient || idx === undefined) return;
+
+        marksByDate[dateStr][patient][idx] = e.target.checked;
+
+        // Обновляем проценты без полной перерисовки (но проще перерисовать)
+        render();
+    });
+
+    // Слушатели фильтров
+    document.getElementById('dateFilter').addEventListener('change', render);
+    document.querySelectorAll('#patientFilters input').forEach(cb => {
+        cb.addEventListener('change', render);
+    });
+
+    // Первоначальный рендер
+    render();
+})();
+</script>
+</body>
+</html>
